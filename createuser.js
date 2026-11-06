@@ -1,5 +1,5 @@
-import { hashSync } from 'bcryptjs';
-import { prepare } from './db';
+const bcrypt = require('bcryptjs');
+const db = require('./db');
 
 const username = process.argv[2];
 const password = process.argv[3];
