@@ -55,8 +55,41 @@ app.post('/login', (req,res) => {
 
     res.render('login', {error: 'Wrong username or password.' });
 });
+
+app.post('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/');
+    });
+});
 app.get('/admin', requireLogin, (req, res) => {
-    res.send('<h1>Welcome, ' + req.session.user.username + '</h1>');
+    const posts = db.prepare('SELECT * FROM posts ORDER BY id DESC').all();
+    res.render('dashboard', { posts });
+});
+app.get('/admin/new', requireLogin, (req, res) => {
+    res.render('edit', { post: null });
+});
+
+app.post('/admin/new', requireLogin, (req,res) => {
+    const { title, body } = req.body;
+    db.prepare('INSERT INTO posts (title, body) VALUES (?, ?)').run(title, body);
+    res.redirect('/admin');
+});
+app.get('/admin/edit/:id', requireLogin, (req, res) => {
+    const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(req.params.id);
+    if(!post) {
+        return res.status(404).send('Post not found');
+    }
+    res.render('edit', { post });
+});
+
+app.post('/admin/edit/:id', requireLogin, (req, res) => {
+    const { title, body } = req.body;
+    db.prepare('UPDATE posts SET title = ?, body = ? WHERE id = ?').run(title, body, req.params.id);
+    res.redirect('/admin');
+});
+app.post('/admin/delete/:id', requireLogin, (req, res) => {
+    db.prepare('DELETE FROM posts WHERE id = ?').run(req.params.id);
+    res.redirect('/admin');
 });
 app.listen(PORT, () => {
     console.log('Server running at http://localhost:' + PORT);
