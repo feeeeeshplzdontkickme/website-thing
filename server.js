@@ -14,6 +14,11 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
+
+app.use((req, res, next)=> {
+    res.locals.user = req.session.user || null;
+    next();
+});
 function requireLogin(req, res, next) {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -21,10 +26,7 @@ function requireLogin(req, res, next) {
     next();
 }
 
-app.use((req, res, next) => {
-    res.locals.user = req.session.user || null;
-    next();
-});
+
 
 app.get('/', (req, res) => {
     const posts = db.prepare('SELECT * FROM posts ORDER BY id DESC').all();

@@ -13,5 +13,4 @@ const insert = db.prepare('INSERT INTO posts (title, body) VALUES (?, ?)');
 for (const [title, body] of posts) {
     insert.run(title, body);
 }
-
 console.log('Added ' + posts.length + ' posts');
